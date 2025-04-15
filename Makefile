@@ -5,14 +5,15 @@
 CC = nvc
 
 # Default MAX_DATA value; override by running, e.g., `make MAX_DATA=2000000`
-MAX_DATA ?= 1000000
+MAX_DATA ?= 100000000
+BATCH_DATA ?= 1000000
 
 # Compiler flags:
 #   -gpu=cc70 : generates code for NVIDIA GPU architecture compute capability 7.0
 #   -Minfo=accel : displays accelerator optimization information during compilation
 #   -O2 : optimization flag (adjust as necessary)
 #   -DMAX_DATA=value : passes the value of MAX_DATA to the preprocessor
-CFLAGS = -acc -gpu=cc70 -Minfo=accel -O2 -DMAX_DATA=$(MAX_DATA)
+CFLAGS = -acc -gpu=cc70 -Minfo=accel -O2 -DMAX_DATA=$(MAX_DATA) -DBATCH_DATA=$(BATCH_DATA)
 
 # Target executable name and source files
 TARGET = prog
