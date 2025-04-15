@@ -51,32 +51,28 @@ int main()
 
     ProgramData_init(&data);
 
-    #pragma acc data create(batch)
+    for (size_t start = 0; start < data.size; start += BATCH_DATA) 
     {
-        for (size_t start = 0; start < data.size; start += BATCH_DATA) 
-        {
-            current_size = (start + BATCH_DATA < data.size) ? BATCH_DATA : (data.size - start);
-            batch.size = current_size;
+        current_size = (start + BATCH_DATA < data.size) ? BATCH_DATA : (data.size - start);
+        batch.size = current_size;
                         
-            for (size_t idx = 0; idx < current_size; ++idx) 
-            {
-                batch.num1[idx] = data.num1[start + idx];
-                batch.num2[idx] = data.num2[start + idx];
-            }
+        for (size_t idx = 0; idx < current_size; ++idx) 
+        {
+            batch.num1[idx] = data.num1[start + idx];
+            batch.num2[idx] = data.num2[start + idx];
+        }
             
-            // Update data on the device with the batch's input values.
-            #pragma acc data update device(batch)
-                
+        // Update data on the device with the batch's input values.
+        #pragma acc data copy(batch)
+        {    
             BatchData_compute(&batch);
-            
-            #pragma acc data update self(batch.res[0:current_size])    
+        }    
             
             // Copy the computed batch results back to the global result array.
-            for (size_t idx = 0; idx < current_size; ++idx) 
-            {
-                data.res[start + idx] = batch.res[idx];
-            }    
-        }
+        for (size_t idx = 0; idx < current_size; ++idx) 
+        {
+            data.res[start + idx] = batch.res[idx];
+        }    
     }
 
     // Print the first 10 results using the correct format specifier for floats.
