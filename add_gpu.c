@@ -1,6 +1,8 @@
 #include <stdio.h>
 
+#ifndef MAX_DATA
 #define MAX_DATA 1000000
+#endif
 
 struct ProgramData 
 { 
