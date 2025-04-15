@@ -1,41 +1,28 @@
-# Makefile for compiling the code with NVIDIA HPC SDK (nvc)
-# targeting GPUs with compute capability 70 (cc70) using OpenACC.
-#
-# Usage Examples:
-#   make                  # Uses the default MAX_DATA and BATCH_DATA values.
-#   make MAX_DATA=2000000 BATCH_DATA=50000   # Overrides the default values.
+# Makefile for NVHPC GPU code with cc70 compute arch and -Minfo=accel reporting,
+# with the ability to override MAX_DATA at compile time.
 
-# Set the compiler to nvc from the NVIDIA HPC SDK.
-CC      := nvc
+# Compiler
+CC = nvc
+
+# Default MAX_DATA value; override by running, e.g., `make MAX_DATA=2000000`
+MAX_DATA ?= 1000000
 
 # Compiler flags:
-# -O2           : Standard optimization level.
-# -acc          : Enable OpenACC support.
-# -gpu=cc70     : Target NVIDIA GPUs with compute capability 70.
-# -Minfo=accel  : Display accelerator-related optimization information.
-CFLAGS  := -O2 -acc -gpu=cc70 -Minfo=accel
+#   -gpu=cc70 : generates code for NVIDIA GPU architecture compute capability 7.0
+#   -Minfo=accel : displays accelerator optimization information during compilation
+#   -O2 : optimization flag (adjust as necessary)
+#   -DMAX_DATA=value : passes the value of MAX_DATA to the preprocessor
+CFLAGS = -gpu=cc70 -Minfo=accel -O2 -DMAX_DATA=$(MAX_DATA)
 
-# Default values for the macros. They can be overridden from the command line.
-MAX_DATA   ?= 1000000
-BATCH_DATA ?= 100000
+# Target executable name and source files
+TARGET = prog
+SRCS = add_gpu.c
 
-# Append macro definitions to the compiler flags.
-CFLAGS += -DMAX_DATA=$(MAX_DATA) -DBATCH_DATA=$(BATCH_DATA)
+# Rule to build the target executable
+$(TARGET): $(SRCS)
+	$(CC) $(CFLAGS) -o $(TARGET) $(SRCS)
 
-# Source file name and the target executable.
-SRC    := add_gpu.c
-TARGET := prog
-
-# Phony targets.
-.PHONY: all clean
-
-# Default target: build the main executable.
-all: $(TARGET)
-
-# Build rule for the target.
-$(TARGET): $(SRC)
-	$(CC) $(CFLAGS) $(SRC) -o $(TARGET)
-
-# Clean target to remove the compiled executable.
+# Clean up generated files
+.PHONY: clean
 clean:
 	rm -f $(TARGET)
