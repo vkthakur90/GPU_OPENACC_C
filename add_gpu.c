@@ -1,7 +1,7 @@
 #include <stdio.h>
 
-#define MAX_DATA 100000000
-#define BATCH_DATA 10000
+#define MAX_DATA 1000000
+#define BATCH_DATA 1000
 
 struct ProgramData 
 { 
@@ -36,7 +36,7 @@ void ProgramData_init(struct ProgramData * restrict data_ptr)
 
 void BatchData_compute(struct BatchData * restrict batch_data_ptr) 
 {
-    #pragma acc parallel loop default(present)
+    #pragma acc parallel loop
     for (size_t idx = 0; idx < batch_data_ptr->size; ++idx) 
     {
         batch_data_ptr->sum[idx]  = batch_data_ptr->num1[idx] + batch_data_ptr->num2[idx];
@@ -65,7 +65,7 @@ int main()
             }
             
             // Update data on the device with the batch's input values.
-            #pragma acc data update device(batch.size, batch.num1[0:current_size], batch.num2[0:current_size])
+            #pragma acc data update device(batch)
                 
             BatchData_compute(&batch);
             
