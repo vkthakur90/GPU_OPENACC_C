@@ -67,9 +67,9 @@ int main()
             batch.num2[idx] = data.num2[start + idx];
         }
         
-        #pragma acc data copy(data)
+        #pragma acc data copy(batch)
         {
-            ProgramData_compute(&data);
+            ProgramData_compute(&batch);
         }
         
         for(size_t idx = 0; idx < batch.size; ++idx)
