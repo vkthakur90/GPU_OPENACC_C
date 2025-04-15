@@ -24,10 +24,9 @@ void ProgramData_init(struct ProgramData * restrict data_ptr)
     }
 }
 
-#pragma acc routine seq
 void ProgramData_compute(struct ProgramData * restrict data_ptr) 
 {
-    #pragma acc parallel loop gang worker vector default(present)
+    #pragma acc parallel loop default(present)
     for (size_t idx = 0; idx < data_ptr->size; ++idx) 
     {
         data_ptr->sum[idx]  = data_ptr->num1[idx] + data_ptr->num2[idx];
