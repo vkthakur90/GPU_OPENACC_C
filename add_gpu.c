@@ -24,14 +24,15 @@ void ProgramData_init(struct ProgramData * restrict data_ptr)
     }
 }
 
-void ProgramData_compute(struct ProgramData * restrict batch_data_ptr) 
+#pragma acc routine seq
+void ProgramData_compute(struct ProgramData * restrict data_ptr) 
 {
-    #pragma acc parallel loop default(present)
-    for (size_t idx = 0; idx < batch_data_ptr->size; ++idx) 
+    #pragma acc parallel loop gang worker vector default(present)
+    for (size_t idx = 0; idx < data_ptr->size; ++idx) 
     {
-        batch_data_ptr->sum[idx]  = batch_data_ptr->num1[idx] + batch_data_ptr->num2[idx];
-        batch_data_ptr->diff[idx] = batch_data_ptr->num1[idx] - batch_data_ptr->num2[idx];
-        batch_data_ptr->res[idx]  = batch_data_ptr->sum[idx] * batch_data_ptr->diff[idx];
+        data_ptr->sum[idx]  = data_ptr->num1[idx] + data_ptr->num2[idx];
+        data_ptr->diff[idx] = data_ptr->num1[idx] - data_ptr->num2[idx];
+        data_ptr->res[idx]  = data_ptr->sum[idx]  * data_ptr->diff[idx];
     }
 }
 
