@@ -12,7 +12,7 @@ MAX_DATA ?= 1000000
 #   -Minfo=accel : displays accelerator optimization information during compilation
 #   -O2 : optimization flag (adjust as necessary)
 #   -DMAX_DATA=value : passes the value of MAX_DATA to the preprocessor
-CFLAGS = -gpu=cc70 -Minfo=accel -O2 -DMAX_DATA=$(MAX_DATA)
+CFLAGS = -acc -gpu=cc70 -Minfo=accel -O2 -DMAX_DATA=$(MAX_DATA)
 
 # Target executable name and source files
 TARGET = prog
