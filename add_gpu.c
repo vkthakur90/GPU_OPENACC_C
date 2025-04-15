@@ -36,7 +36,7 @@ void ProgramData_init(struct ProgramData * restrict data_ptr)
 
 void BatchData_compute(struct BatchData * restrict batch_data_ptr) 
 {
-    #pragma acc parallel loop present(batch_data_ptr)
+    #pragma acc parallel loop default(present)
     for (size_t idx = 0; idx < batch_data_ptr->size; ++idx) 
     {
         batch_data_ptr->sum[idx]  = batch_data_ptr->num1[idx] + batch_data_ptr->num2[idx];
