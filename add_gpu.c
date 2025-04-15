@@ -69,7 +69,7 @@ int main()
         
         #pragma acc data copy(batch)
         {
-            ProgramData_compute(&batch);
+            BatchData_compute(&batch);
         }
         
         for(size_t idx = 0; idx < batch.size; ++idx)
