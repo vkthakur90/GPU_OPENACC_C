@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 #define MAX_DATA 1000000
-#define BATCH_DATA 1000
+#define BATCH_DATA 100000
 
 struct ProgramData 
 { 
