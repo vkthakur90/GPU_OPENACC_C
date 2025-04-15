@@ -23,8 +23,8 @@ BATCH_DATA ?= 100000
 CFLAGS += -DMAX_DATA=$(MAX_DATA) -DBATCH_DATA=$(BATCH_DATA)
 
 # Source file name and the target executable.
-SRC    := main.c
-TARGET := main
+SRC    := add_gpu.c
+TARGET := prog
 
 # Phony targets.
 .PHONY: all clean
