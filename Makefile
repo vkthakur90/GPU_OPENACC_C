@@ -2,7 +2,7 @@
 CC = nvc
 
 # Compiler flags
-CFLAGS = -acc -Minfo=acc 
+CFLAGS = -acc -Minfo=accel -gpu=cc70 
 
 # Target executable
 TARGET = prog
