@@ -1,86 +1,70 @@
 #include <stdio.h>
+#include <stddef.h>
 
 #ifndef MAX_DATA
-#define MAX_DATA 100000000
-#endif
-
-#ifndef BATCH_DATA
-#define BATCH_DATA 1000000
+#define MAX_DATA 1000000
 #endif
 
 struct ProgramData 
 { 
     size_t size;
-    float num1[MAX_DATA];
-    float num2[MAX_DATA];
-    float res[MAX_DATA];
-};
-
-struct BatchData 
-{ 
-    size_t size;
-    float num1[BATCH_DATA];
-    float num2[BATCH_DATA];
-    float sum[BATCH_DATA];
-    float diff[BATCH_DATA];
-    float res[BATCH_DATA];
+    struct {
+        float num1[MAX_DATA];
+        float num2[MAX_DATA];
+    } inputs;
+    struct {
+        float sum[MAX_DATA];
+        float diff[MAX_DATA];
+        float prod[MAX_DATA];
+        float ratio[MAX_DATA];
+    } outputs;
 };
 
 static struct ProgramData data;
-static struct BatchData batch;
 
 void ProgramData_init(struct ProgramData * restrict data_ptr) 
 {
-    data_ptr->size = MAX_DATA;
+    #pragma acc parallel loop default(present)
     for (size_t idx = 0; idx < data_ptr->size; ++idx) 
     {
-        data_ptr->num1[idx] = (float)((idx + 1) * 3);
-        data_ptr->num2[idx] = (float)((idx + 1) * 2);
+        data_ptr->inputs.num1[idx] = (float)((idx + 1) * 3);
+        data_ptr->inputs.num2[idx] = (float)((idx + 1) * 2);
     }
 }
 
-void BatchData_compute(struct BatchData * restrict batch_ptr) 
+void ProgramData_compute(struct ProgramData * restrict data_ptr) 
 {
     #pragma acc parallel loop default(present)
-    for (size_t idx = 0; idx < batch_ptr->size; ++idx) 
+    for (size_t idx = 0; idx < data_ptr->size; ++idx) 
     {
-        batch_ptr->sum[idx]  = batch_ptr->num1[idx] + batch_ptr->num2[idx];
-        batch_ptr->diff[idx] = batch_ptr->num1[idx] - batch_ptr->num2[idx];
-        batch_ptr->res[idx]  = batch_ptr->sum[idx]  * batch_ptr->diff[idx];
+        float a = data_ptr->inputs.num1[idx];
+        float b = data_ptr->inputs.num2[idx];
+
+        data_ptr->outputs.sum[idx]   = a + b;
+        data_ptr->outputs.diff[idx]  = a - b;
+        data_ptr->outputs.prod[idx]  = a * b;
+        data_ptr->outputs.ratio[idx] = (b != 0.0f) ? (a / b) : 0.0f;
     }
 }
 
 int main() 
 {
-    size_t current_size;
+    data.size = MAX_DATA;
 
-    ProgramData_init(&data);
-    
-    for(size_t start = 0; start < MAX_DATA; start += BATCH_DATA)
+    #pragma acc data copy(data)
     {
-        current_size = (start + BATCH_DATA < MAX_DATA) ? BATCH_DATA : MAX_DATA - start;
-        batch.size = current_size;
-        
-        for(size_t idx = 0; idx < batch.size; ++idx)
-        {
-            batch.num1[idx] = data.num1[start + idx];
-            batch.num2[idx] = data.num2[start + idx];
-        }
-        
-        #pragma acc data copy(batch)
-        {
-            BatchData_compute(&batch);
-        }
-        
-        for(size_t idx = 0; idx < batch.size; ++idx)
-        {
-            data.res[start + idx] = batch.res[idx];
-        }
+        ProgramData_init(&data);
+        ProgramData_compute(&data);
     }
-    
+
     for (size_t idx = 0; idx < 10; ++idx) 
     {
-        printf("%f\n", data.res[idx]);
+        printf("%f\t%f\t%f\t%f\n", 
+            data.outputs.sum[idx], 
+            data.outputs.diff[idx],
+            data.outputs.prod[idx],
+            data.outputs.ratio[idx]
+        );
     }
 
     return 0;
